@@ -1,0 +1,110 @@
+syntax = "proto3";
+
+option csharp_namespace = "AeroQ.Core.Protos";
+
+package aeroq;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// Сервис AeroQ — основной API для работы с очередью
+service AeroQService {
+  // Отправить задачу в очередь (вызывает Producer)
+  rpc Enqueue (EnqueueRequest) returns (EnqueueResponse);
+
+  // Получить задачу из очереди (вызывает Worker)
+  rpc Dequeue (DequeueRequest) returns (DequeueResponse);
+
+  // Сообщить об успешном выполнении задачи (вызывает Worker)
+  rpc Complete (CompleteRequest) returns (google.protobuf.Empty);
+
+  // Сообщить об ошибке выполнения задачи (вызывает Worker)
+  rpc Fail (FailRequest) returns (google.protobuf.Empty);
+
+  // Отменить задачу (вызывает Producer)
+  rpc Cancel (CancelRequest) returns (CancelResponse);
+
+  // Получить статус задачи (вызывает Producer)
+  rpc GetStatus (GetStatusRequest) returns (GetStatusResponse);
+}
+
+// Запрос на отправку задачи
+message EnqueueRequest {
+  string queue = 1;              // Имя очереди
+  string type = 2;               // Тип задачи (имя обработчика)
+  string payload = 3;            // Данные задачи в JSON
+  int32 priority = 4;            // Приоритет (0-10)
+  int32 max_retries = 5;         // Максимальное количество попыток
+  google.protobuf.Timestamp scheduled_at = 6; // Когда выполнить (опционально)
+  string idempotency_key = 7;    // Ключ идемпотентности (опционально)
+}
+
+// Ответ на отправку задачи
+message EnqueueResponse {
+  string task_id = 1;            // ID созданной задачи
+  bool success = 2;              // Успешно ли создана
+  string error_message = 3;      // Текст ошибки (если не успешно)
+}
+
+// Запрос на получение задачи из очереди
+message DequeueRequest {
+  string queue = 1;              // Имя очереди
+  string worker_id = 2;          // ID воркера (для блокировки)
+}
+
+// Ответ на получение задачи
+message DequeueResponse {
+  TaskItemProto task = 1;        // Задача (null, если очередь пуста)
+  bool success = 2;              // Успешно ли получена
+}
+
+// Запрос на завершение задачи
+message CompleteRequest {
+  string task_id = 1;            // ID задачи
+}
+
+// Запрос на сообщение об ошибке
+message FailRequest {
+  string task_id = 1;            // ID задачи
+  string error = 2;              // Текст ошибки
+}
+
+// Запрос на отмену задачи
+message CancelRequest {
+  string task_id = 1;            // ID задачи
+}
+
+// Ответ на отмену задачи
+message CancelResponse {
+  bool success = 1;              // Успешно ли отменена
+}
+
+// Запрос на получение статуса
+message GetStatusRequest {
+  string task_id = 1;            // ID задачи
+}
+
+// Ответ на получение статуса
+message GetStatusResponse {
+  TaskItemProto task = 1;        // Задача (null, если не найдена)
+  bool found = 2;                // Найдена ли задача
+}
+
+// Прототип задачи (используется в ответах)
+message TaskItemProto {
+  string id = 1;
+  string queue = 2;
+  string type = 3;
+  string payload = 4;
+  int32 status = 5;
+  int32 priority = 6;
+  int32 retry_count = 7;
+  int32 max_retries = 8;
+  string error = 9;
+  google.protobuf.Timestamp scheduled_at = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp started_at = 12;
+  google.protobuf.Timestamp completed_at = 13;
+  string locked_by = 14;
+  google.protobuf.Timestamp locked_until = 15;
+}

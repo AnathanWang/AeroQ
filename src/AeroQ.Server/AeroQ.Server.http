@@ -1,0 +1,6 @@
+@AeroQ.Server_HostAddress = http://localhost:5218
+
+GET {{AeroQ.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

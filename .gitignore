@@ -1,0 +1,78 @@
+# Папки сборки
+**/[Bb]in/
+**/[Oo]bj/
+**/[Dd]ebug/
+**/[Rr]elease/
+**/x64/
+**/x86/
+**/[Aa][Rr][Mm]/
+**/[Aa][Rr][Mm]64/
+**/bld/
+**/[Bb]inlog/
+**/[Ll]og/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.rsuser
+*.DotSettings.user
+
+# Rider
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+# NuGet
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nupkg
+*.snupkg
+**/[Pp]roject.assets.json
+**/project.lock.json
+**/project.fragment.lock.json
+**/artifacts/
+
+# Snapshot файл от AeroKV (если случайно скопировал)
+*.snapshot.json
+aerokv_snapshot.json
+
+# Пользовательские файлы
+*.csproj.user
+*.pubxml
+*.publishproj
+
+# OS файлы
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Токены и секреты (ВАЖНО!)
+appsettings.Development.json
+appsettings.*.json
+!appsettings.json
+*.env
+.env.*
+
+# Docker volumes
+**/data/
+**/volumes/
+
+# Test results
+**/[Tt]est[Rr]esult*/
+**/[Bb]uild[Ll]og.*
+
+# NCrunch
+**/_NCrunch_*/
+**/*.*crunchproject.*
+**/*.*crunchsolution.*
+
+# StyleCop
+StyleCopReport.xml
+
+# Dotnet
+*.DotSettings
