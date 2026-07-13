@@ -28,6 +28,7 @@
     <Version>1.0.0</Version>
     <Authors>ТвоеИмя</Authors>
     <Description>Client SDK for AeroQ - use this to enqueue tasks</Description>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
 </Project>

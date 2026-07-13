@@ -13,6 +13,7 @@
     <Version>1.0.0</Version>
     <Authors>ТвоеИмя</Authors>
     <Description>Worker SDK for AeroQ - use this to process tasks</Description>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
 </Project>

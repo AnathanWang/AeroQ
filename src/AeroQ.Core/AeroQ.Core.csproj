@@ -10,6 +10,7 @@
     <Authors>Cenra</Authors>
     <Description>Core models and interfaces for AeroQ distributed task queue</Description>
     <PackageTags>queue;task-queue;distributed;worker</PackageTags>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
