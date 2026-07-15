@@ -37,7 +37,7 @@ public class AeroQClient : IAeroQClient, IDisposable
     public async Task<Guid> EnqueueAsync<T>(string queue, T payload, EnqueueOptions? options = null)
     {
         options ??= new EnqueueOptions();
-        
+
         //Сериалиазуем payload в Json
         var payloadJson = JsonSerializer.Serialize(payload);
 
@@ -51,16 +51,16 @@ public class AeroQClient : IAeroQClient, IDisposable
             MaxRetries = options.MaxRetries,
             IdempotencyKey = options.IdempotencyKey ?? string.Empty
         };
-        
+
         //Если указана отложенная задача
         if (options.ScheduledAt.HasValue)
         {
             request.ScheduledAt = options.ScheduledAt.Value.ToTimestamp();
         }
-        
+
         //отправляем запрос на сервер
         var response = await _grpcClient.EnqueueAsync(request);
-        
+
         //проверяем ответ
         if (!response.Success)
         {
@@ -107,5 +107,42 @@ public class AeroQClient : IAeroQClient, IDisposable
     public void Dispose()
     {
         _channel?.Dispose();
+    }
+
+    public async Task<TaskItem?> DequeueAsync(string queue, string workerId)
+    {
+        var request = new DequeueRequest
+        {
+            Queue = queue,
+            WorkerId = workerId
+        };
+
+        var response = await _grpcClient.DequeueAsync(request);
+
+        if (!response.Success || response.Task == null)
+            return null;
+
+        return response.Task.ToTaskItem();
+    }
+
+    public async Task CompleteAsync(Guid taskId)
+    {
+        var request = new CompleteRequest
+        {
+            TaskId = taskId.ToString()
+        };
+
+        await _grpcClient.CompleteAsync(request);
+    }
+
+    public async Task FailAsync(Guid taskId, string error)
+    {
+        var request = new FailRequest
+        {
+            TaskId = taskId.ToString(),
+            Error = error
+        };
+
+        await _grpcClient.FailAsync(request);
     }
 }

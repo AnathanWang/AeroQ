@@ -31,7 +31,7 @@ public class TaskItem
     /// <summary>
     /// Текущий статус задачи
     /// </summary>
-    public TaskStatus Status { get; set; } = TaskStatus.Pending;
+    public AeroQ.Core.Enums.TaskStatus Status { get; set; } = AeroQ.Core.Enums.TaskStatus.Pending;
 
     /// <summary>
     /// Приоритет задачи (0-10 чем выше тем важнее)
@@ -82,4 +82,6 @@ public class TaskItem
     /// до какого времени задача заблокирована (если воркер упал, задача вернется в очередь)
     /// </summary>
     public DateTime? LockedUntil { get; set; }
+    
+    public string? IdempotencyKey { get; set; }
 }

@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\AeroQ.Worker\AeroQ.Worker.csproj" />
+    <ProjectReference Include="..\..\src\AeroQ.Client\AeroQ.Client.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
