@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
+using AeroQ.Server.BackgroundServices;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -26,6 +27,8 @@ builder.Services.AddDbContext<AeroQDbContext>(options => options.UseNpgsql(build
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 
 builder.Services.AddGrpc();
+
+builder.Services.AddHostedService<TaskMaintenanceBackgroundService>();
 
 builder.WebHost.ConfigureKestrel(options =>
 {
