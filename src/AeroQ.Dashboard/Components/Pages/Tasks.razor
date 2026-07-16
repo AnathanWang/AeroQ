@@ -1,0 +1,98 @@
+@page "/tasks"
+@using AeroQ.Dashboard.Services
+@using AeroQ.Dashboard.Data
+@inject DashboardService DashboardService
+
+<PageTitle>Задачи - AeroQ</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">📋 Список задач</MudText>
+
+<!-- Фильтры -->
+<MudGrid>
+    <MudItem xs="12" md="4">
+        <MudSelect T="string" Label="Фильтр по статусу" Value="@_selectedStatusString" ValueChanged="OnStatusChanged" Clearable="true">
+            <!-- ИСПРАВЛЕНО: @("Все") явно указывает компилятору, что это строка -->
+            <MudSelectItem T="string" Value="@("Все")">Все статусы</MudSelectItem>
+            @foreach (var status in Enum.GetValues<AeroQ.Core.Enums.TaskStatus>())
+            {
+                <MudSelectItem T="string" Value="@status.ToString()">@status.ToString()</MudSelectItem>
+            }
+        </MudSelect>
+    </MudItem>
+    <MudItem xs="12" md="4">
+        <MudTextField T="string" Label="Фильтр по очереди" Value="@_selectedQueue" ValueChanged="OnQueueChanged" Clearable="true" />
+    </MudItem>
+</MudGrid>
+
+<!-- Таблица задач -->
+<MudTable Items="@_tasks" Hover="true" Striped="true" Dense="true" Loading="@_loading">
+    <HeaderContent>
+        <MudTh>ID</MudTh>
+        <MudTh>Очередь</MudTh>
+        <MudTh>Тип</MudTh>
+        <MudTh>Статус</MudTh>
+        <MudTh>Приоритет</MudTh>
+        <MudTh>Создано</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="ID">@context.Id.ToString().Substring(0, 8)...</MudTd>
+        <MudTd DataLabel="Очередь">@context.Queue</MudTd>
+        <MudTd DataLabel="Тип">@context.Type</MudTd>
+        <MudTd DataLabel="Статус">
+            <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(context.Status)">@context.Status.ToString()</MudChip>
+        </MudTd>
+        <MudTd DataLabel="Приоритет">@context.Priority</MudTd>
+        <MudTd DataLabel="Создано">@context.CreatedAt.ToString("g")</MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private List<TaskEntity> _tasks = new();
+    private bool _loading = true;
+    
+    private string? _selectedStatusString;
+    private string? _selectedQueue;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTasks();
+    }
+
+    private async Task LoadTasks()
+    {
+        _loading = true;
+        
+        AeroQ.Core.Enums.TaskStatus? statusFilter = null;
+        
+        if (!string.IsNullOrEmpty(_selectedStatusString) && _selectedStatusString != "Все" && 
+            Enum.TryParse<AeroQ.Core.Enums.TaskStatus>(_selectedStatusString, out var parsedStatus))
+        {
+            statusFilter = parsedStatus;
+        }
+
+        _tasks = await DashboardService.GetTasksAsync(statusFilter, _selectedQueue);
+        _loading = false;
+    }
+
+    private async Task OnStatusChanged(string? value)
+    {
+        _selectedStatusString = value;
+        await LoadTasks();
+    }
+
+    private async Task OnQueueChanged(string? queue)
+    {
+        _selectedQueue = queue;
+        await LoadTasks();
+    }
+
+    private MudBlazor.Color GetStatusColor(AeroQ.Core.Enums.TaskStatus status) => status switch
+    {
+        AeroQ.Core.Enums.TaskStatus.Pending => MudBlazor.Color.Info,
+        AeroQ.Core.Enums.TaskStatus.Processing => MudBlazor.Color.Warning,
+        AeroQ.Core.Enums.TaskStatus.Completed => MudBlazor.Color.Success,
+        AeroQ.Core.Enums.TaskStatus.Failed => MudBlazor.Color.Error,
+        AeroQ.Core.Enums.TaskStatus.Scheduled => MudBlazor.Color.Tertiary,
+        _ => MudBlazor.Color.Default
+    };
+}

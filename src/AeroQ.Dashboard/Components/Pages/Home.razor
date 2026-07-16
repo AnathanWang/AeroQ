@@ -1,0 +1,122 @@
+﻿@page "/"
+@using AeroQ.Dashboard.Services
+@inject DashboardService DashboardService
+@implements IDisposable
+
+<PageTitle>AeroQ Dashboard</PageTitle>
+
+<MudText Typo="Typo.h3" Class="mb-4">🚀 AeroQ Dashboard</MudText>
+
+@if (_stats == null)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+else
+{
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudText Typo="Typo.subtitle1">Всего задач</MudText>
+                <MudText Typo="Typo.h4" Color="Color.Primary">@_stats.TotalTasks</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudText Typo="Typo.subtitle1">В очереди</MudText>
+                <MudText Typo="Typo.h4" Color="Color.Info">@_stats.PendingTasks</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudText Typo="Typo.subtitle1">Выполняется</MudText>
+                <MudText Typo="Typo.h4" Color="Color.Warning">@_stats.ProcessingTasks</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudText Typo="Typo.subtitle1">Завершено</MudText>
+                <MudText Typo="Typo.h4" Color="Color.Success">@_stats.CompletedTasks</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudText Typo="Typo.subtitle1">Провалено</MudText>
+                <MudText Typo="Typo.h4" Color="Color.Error">@_stats.FailedTasks</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudText Typo="Typo.subtitle1">Запланировано</MudText>
+                <MudText Typo="Typo.h4">@_stats.ScheduledTasks</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudText Typo="Typo.subtitle1">Dead Letters</MudText>
+                <MudText Typo="Typo.h4" Color="Color.Dark">@_stats.DeadLetterCount</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudText Typo="Typo.subtitle1">За 24 часа</MudText>
+                <MudText Typo="Typo.h4" Color="Color.Tertiary">@_stats.TasksLast24Hours</MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <MudText Typo="Typo.h5" Class="mt-8 mb-4">📊 Статистика по очередям</MudText>
+    
+    <MudTable Items="@_queueStats" Hover="true" Dense="true" Striped="true">
+        <HeaderContent>
+            <MudTh>Очередь</MudTh>
+            <MudTh>Всего</MudTh>
+            <MudTh>В очереди</MudTh>
+            <MudTh>Выполняется</MudTh>
+            <MudTh>Завершено</MudTh>
+            <MudTh>Провалено</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Очередь">@context.Queue</MudTd>
+            <MudTd DataLabel="Всего">@context.Total</MudTd>
+            <MudTd DataLabel="В очереди">@context.Pending</MudTd>
+            <MudTd DataLabel="Выполняется">@context.Processing</MudTd>
+            <MudTd DataLabel="Завершено">@context.Completed</MudTd>
+            <MudTd DataLabel="Провалено">@context.Failed</MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    private DashboardStats? _stats;
+    private List<QueueStats> _queueStats = new();
+    private Timer? _timer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+        
+        _timer = new Timer(async _ =>
+        {
+            await LoadDataAsync();
+            await InvokeAsync(StateHasChanged);
+        }, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _stats = await DashboardService.GetStatsAsync();
+        _queueStats = await DashboardService.GetQueueStatsAsync();
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+}
